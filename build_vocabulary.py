@@ -1,7 +1,7 @@
 #-*-coding:utf8-*-
 
-from fb2 import PyFb2
-from body import MainTag
+from fb2lib.fb2 import PyFb2
+from fb2lib.body import MainTag
 
 import sys
 import os
@@ -25,6 +25,17 @@ curr_dir_path = os.path.dirname(os.path.realpath(__file__))
 FB2_DIR_PATH = os.path.join(curr_dir_path, "fb2-sources")
 NUM_THREADS = 1
 
+def is_bad_text(text):
+    bad = False
+
+    if text.strip() == "":
+        bad = True
+
+    if len(re.findall(r'[0-9]+', text)) > 0:
+        bad = True
+    if len(re.findall(r'[A-Za-z]+', text)) > 0:
+        bad = True
+
 
 def build_vocabulary(output_path='vocabulary.txt'):
 
@@ -38,7 +49,7 @@ def build_vocabulary(output_path='vocabulary.txt'):
 
     pbar = tqdm(total=len(os.listdir(FB2_DIR_PATH)))
 
-    sent_detector = nltk.data.load('russian.pickle') 
+    sent_detector = nltk.data.load('nltk_data/russian.pickle') 
 
     def process_book(b):
         sentences = []
@@ -71,6 +82,8 @@ def build_vocabulary(output_path='vocabulary.txt'):
 
         
         for sent in sent_detector.tokenize(text):
+            if is_bad_text(sent):
+                continue
 
             # convert linebreaks to spaces                    
             sent = sent.replace("\n", " ")
@@ -95,11 +108,14 @@ def build_vocabulary(output_path='vocabulary.txt'):
         for sentence in text:
             sentences.append(sentence)
 
-    print 'Wrote %i sentences to %s' % (len(sentences), output_path)
+    
+    print 'Writing sentences to %s' % output_path
 
     f = open(output_path, 'w+')
     f.write('\n'.join(sentences))    
     f.close()
+
+    print 'Wrote %i sentences to %s' % (len(sentences), output_path)
 
 
 if __name__ == "__main__":
