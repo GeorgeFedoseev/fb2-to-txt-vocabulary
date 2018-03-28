@@ -75,7 +75,12 @@ def build_vocabulary(output_path='vocabulary.txt'):
 
         #print text
 
-        text_language = detect(text[0:1500])
+        text_language = 'unknown'
+        try:
+            text_language = detect(text[0:1500])
+        except:
+            pass
+            
         if text_language != "ru":
             print 'skip not russian text (%s)' % text_language
             return []
